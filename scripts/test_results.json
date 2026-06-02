@@ -1,0 +1,44 @@
+{
+  "processed": 5,
+  "errors": 1,
+  "results": [
+    {
+      "part_number": "P-1001",
+      "make": "Honda",
+      "model": "Civic",
+      "category": "Filter",
+      "compatibility": "2018-2023 Civic, 2019-2022 Insight"
+    },
+    {
+      "part_number": "P-1002",
+      "make": "Toyota",
+      "model": "Camry",
+      "category": "Brake Pad",
+      "compatibility": "2017-2023 Camry, 2018-2022 Avalon"
+    },
+    {
+      "part_number": "P-1003",
+      "make": "Ford",
+      "model": "F-150",
+      "category": "Battery",
+      "compatibility": "2015-2023 F-150"
+    },
+    {
+      "part_number": "P-1004",
+      "make": "Honda",
+      "model": "Accord",
+      "category": "Belt",
+      "compatibility": "2016-2022 Accord"
+    },
+    {
+      "part_number": "P-9999",
+      "make": "Legacy",
+      "model": "Retired",
+      "category": "Filter",
+      "compatibility": "Discontinued"
+    }
+  ],
+  "not_found": [
+    "P-UNKNOWN"
+  ]
+}

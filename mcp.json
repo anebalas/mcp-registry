@@ -1,0 +1,70 @@
+{
+  "name": "part-registry",
+  "version": "1.0.0",
+  "description": "Production-grade MCP server with authentication, rate limiting, audit logging, and three interfaces (MCP + REST + CLI).",
+  "license": "MIT",
+  "tools": [
+    {
+      "name": "decodePart",
+      "description": "Decode a part number and return its full attributes: make, model, category, and vehicle compatibility range.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "part_number": {
+            "type": "string",
+            "description": "The part number to look up (e.g. 'P-1001'). Uppercase letters, a hyphen, and digits.",
+            "examples": ["P-1001", "P-1002"]
+          }
+        },
+        "required": ["part_number"]
+      }
+    },
+    {
+      "name": "validatePart",
+      "description": "Check whether a part number exists and is active. Returns valid: true or false. Never errors on unknown parts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "part_number": {
+            "type": "string",
+            "description": "The part number to validate (e.g. 'P-1001').",
+            "examples": ["P-1001", "P-9999"]
+          }
+        },
+        "required": ["part_number"]
+      }
+    },
+    {
+      "name": "getPartInfo",
+      "description": "Validate and decode in a single call. Use this for order processing or intake workflows where you need both validity status and attributes together.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "part_number": {
+            "type": "string",
+            "description": "The part number to look up (e.g. 'P-1001').",
+            "examples": ["P-1001", "P-9999"]
+          }
+        },
+        "required": ["part_number"]
+      }
+    }
+  ],
+  "installation": {
+    "python": {
+      "command": "python",
+      "args": ["-m", "mcp_server"],
+      "env": {
+        "PART_API_KEY": "<your-team-api-key>",
+        "DATABASE_URL": "postgresql://user:password@localhost:5432/part_registry"
+      }
+    },
+    "docker": {
+      "command": "docker",
+      "args": ["compose", "run", "--rm", "mcp"],
+      "env": {
+        "PART_API_KEY": "<your-team-api-key>"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# Registry CODEOWNERS
+#
+# Auth, schema, and seed data are the trust boundary of this system.
+# Changes to these files require explicit review from the registry team
+# regardless of who opens the PR.
+
+# Auth, rate limiting, and connection pool — any change here is a security change
+registry/auth.py        @registry-team
+registry/db.py          @registry-team
+
+# Schema migrations are irreversible — require registry team sign-off
+migrations/             @registry-team
+
+# Seed data controls which teams have access and at what scope
+scripts/seed.py         @registry-team
+
+# CI pipeline — prevent bypassing the test gate
+.github/workflows/      @registry-team

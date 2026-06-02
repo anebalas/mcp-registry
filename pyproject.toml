@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "part-registry"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=0.4.0",
+    "psycopg2-binary>=2.9.9",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "click>=8.1.0",
+    "tabulate>=0.9.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["registry*", "mcp_server*", "api*", "cli*"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated:UserWarning",
+]
