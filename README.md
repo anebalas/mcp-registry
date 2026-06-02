@@ -168,6 +168,8 @@ part-registry/
 
 ## Setup
 
+> **Note on the data layer:** In production, the registry sits in front of an Oracle stored procedure. This implementation uses PostgreSQL as a drop-in stand-in — the governance pattern (auth, audit logging, rate limiting, three interfaces) is identical regardless of what backs the registry. Swap `registry/db.py` for your own connection layer and the rest carries over unchanged.
+
 **Prerequisites:** Python 3.11+, PostgreSQL running locally.
 
 ```bash
