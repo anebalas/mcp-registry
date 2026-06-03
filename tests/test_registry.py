@@ -114,11 +114,11 @@ class TestDecodePart:
         assert result["part_number"] == "P-1001"
         assert result["make"] == "Honda"
         assert result["model"] == "Civic"
-        assert result["category"] == "Filter"
+        assert result["category"] == "Oil Filter"
         assert "compatibility" in result
 
     def test_decode_different_part(self):
-        result = call_decode("P-1002", FINANCE_KEY)
+        result = call_decode("P-2001", FINANCE_KEY)
         assert result["make"] == "Toyota"
         assert result["model"] == "Camry"
 

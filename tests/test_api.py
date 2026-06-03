@@ -49,7 +49,7 @@ class TestDecodePart:
         assert body["part_number"] == "P-1001"
         assert body["make"] == "Honda"
         assert body["model"] == "Civic"
-        assert body["category"] == "Filter"
+        assert body["category"] == "Oil Filter"
         assert "compatibility" in body
 
     def test_decode_unknown_part_returns_404(self):
