@@ -72,6 +72,18 @@ Or with Docker:
 
 Replace the `parts` table and `decodePart`, `validatePart`, `getPartInfo` tools with your own data capability. The auth, audit log, rate limiting, and three-interface pattern carry over unchanged.
 
+## Where This Fits
+
+MCP tooling currently falls into three categories. This repository occupies the gap between the first two and the third.
+
+**Reference demos** — single-purpose connectors with no authentication, no concurrency handling, and no audit trail. Built for one developer on localhost. Fine for learning the protocol, not for governing real data access.
+
+**Cloud-native gateways** — Kubernetes-native platforms that handle routing, identity federation, and service mesh policies at the infrastructure layer. Powerful, but require significant operational overhead and assume cloud-native deployments.
+
+**This repository** — lightweight, Python-native, runs on Docker Compose, built specifically for the problem of governing internal enterprise data access. Thread-safe connection pooling, scoped API keys, full audit logging, GitOps-driven access control, and three interfaces sharing one registry core. No cloud vendor required. Clone it, configure it, and run it against your own data layer.
+
+If you are building a production MCP server for internal teams and need authentication, observability, and governance without standing up a platform, this is the pattern.
+
 ## Architecture
 
 ```
