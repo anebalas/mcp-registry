@@ -18,14 +18,32 @@ Most MCP examples are hello-world demos. This is a production-grade reference im
 | **Compound Tooling** | Single-purpose | `getPartInfo` combines validate + decode in one round-trip |
 | **Thread Safety** | `SimpleConnectionPool` | `ThreadedConnectionPool` with double-checked lock |
 | **Interfaces** | MCP only | MCP + REST API + CLI sharing one registry core |
-| **Tests** | None | 34 integration tests against a real database |
+| **Tests** | None | 36 integration tests against a real database |
 | **Docker** | None | `docker compose up` |
 
+## Quick Start
+
 ```bash
-git clone https://github.com/anebalas/mcp-registry
-cd mcp-registry
-make install && make db && make seed && make test
+# 1. Setup — install dependencies, create database, load test data
+make install && make db && make seed
+
+# 2. Verify — 36 integration tests against a real database
+make test
+
+# 3. Run — start the REST API, then try a sample request
+make run-api
 ```
+
+```bash
+# Sample requests against the running API
+curl http://localhost:8001/parts/P-1001 -H "X-API-Key: sk-finance-team-key-001"
+curl http://localhost:8001/parts/P-9999/validate -H "X-API-Key: sk-compliance-team-key-002"
+curl http://localhost:8001/usage -H "X-API-Key: sk-admin-key-004"
+```
+
+For the MCP server: `make run-mcp` — then add to Claude Desktop or Cursor using the config below.
+
+---
 
 ### Add to Claude Desktop / Cursor
 
@@ -153,6 +171,18 @@ If you are building a production MCP server for internal teams and need authenti
 
 Three interfaces share one registry core. Every call is authenticated, scoped, rate-limited, and audit-logged.
 
+## When to Use MCP, CLI, or REST
+
+| | MCP | CLI | REST |
+|---|---|---|---|
+| **Who's consuming?** | Non-technical users, AI agents with known tasks | Engineers, pipelines, exploratory agents | Applications and services |
+| **Path known upfront?** | Yes — bounded capability, structured response | No — explore, observe, adjust | Yes — stable HTTP contract |
+| **Cost of a mistake?** | High — regulated data, critical systems | Low — investigation, debugging | Medium — depends on caller |
+| **Discoverability needed?** | Yes — agent finds it via registry | No — caller already knows what they need | No — API contract is documented |
+| **Example** | PM asks "is part X compatible?" via chat | Engineer debugs why two teams get different counts | Mobile app fetches part details on scan |
+
+The decision heuristic: MCP when the capability is known and the consumer might not be technical. CLI when the path isn't known in advance. REST for everything in between that needs a stable HTTP contract.
+
 ## Project Structure
 
 ```
@@ -174,7 +204,7 @@ part-registry/
 ├── scripts/
 │   └── seed.py       — Test parts and API keys
 └── tests/
-    ├── test_registry.py — Auth, MCP tools, audit log (18 tests)
+    ├── test_registry.py — Auth, MCP tools, audit log (21 tests)
     └── test_api.py      — REST endpoints (15 tests)
 ```
 
@@ -218,6 +248,39 @@ Every interface requires an API key. Keys are scoped — a team can only call to
 Keys are stored as SHA-256 hashes. Plain-text keys in `seed.py` are for local development only — use a secrets manager in production.
 
 The plain-text token is never stored. On first use, `auth.py` computes `key_hash = hashlib.sha256(api_key.encode()).hexdigest()` and looks it up against the `api_keys` table. An auditing team inspecting the database sees only the hash — the raw token is unrecoverable from it.
+
+## Identity and Audit
+
+Every call in the audit log is attributed to a team. There are no anonymous requests — a missing or invalid key returns a 401 before any data is touched.
+
+**Request attribution** — inspect who called what and when:
+
+```bash
+# All calls from the finance team this month
+python cli/registry_cli.py usage --team finance --from 2026-06-01
+
+# Every failed call in the last 24 hours, with the error message
+python cli/registry_cli.py errors --last 24h
+
+# Teams approaching their daily rate limit
+python cli/registry_cli.py alerts
+```
+
+**Key rotation** — to rotate a team's key, update `scripts/seed.py` with a new plain-text token and re-run the seed script. The old hash is overwritten. Open a PR so the rotation has an owner and a timestamp in git history.
+
+```bash
+# After updating seed.py
+python scripts/seed.py
+```
+
+**Access revocation** — to cut off a team immediately, remove their row from `scripts/seed.py` and re-run. Their key hash is deleted from `api_keys`. Every subsequent call returns 401.
+
+```bash
+# Verify they're gone
+python cli/registry_cli.py teams
+```
+
+**What the audit log proves** — the `call_logs` table answers "what did the ml-team call today?" The git history answers "who approved giving them `read:parts` access and when?" Together they satisfy the two questions an auditor actually asks: what happened at runtime, and what was authorized in advance.
 
 ## Running the Interfaces
 
@@ -330,6 +393,10 @@ filterwarnings = [
 This survives third-party framework updates: if the warning message changes, the filter stops matching and the CI run fails — surfacing the change rather than silently ignoring it.
 
 ## Governance Model
+
+Most teams solve the "too many integrations" problem by adding a new integration. Twenty teams accessing the same Oracle procedure in twenty different ways — some with hardcoded credentials, some via CSV batch jobs, some through custom HTTP endpoints nobody fully understands anymore. Same data source. No identity on any call. When something breaks at 2am, there is no way to know which team caused it.
+
+A registry fixes the connectivity problem. Governance fixes the trust problem. Without it, replacing twenty ad-hoc integrations with twenty ungoverned registry connections is not progress.
 
 Access to the registry is managed through pull requests, not a dashboard or tickets.
 
